@@ -44,6 +44,7 @@ namespace SalesWebMVC
 
             services.AddScoped<SeedingService>();
             services.AddScoped<SellerService>();
+            services.AddScoped<DepartmentService>();
             //Agora o serviço, pode ser injetada em outras classes.
 
         }
