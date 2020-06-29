@@ -7,6 +7,7 @@ using SalesWebMVC.Models;
 using SalesWebMVC.Services;
 using SalesWebMVC.Models.ViewModels;
 using SalesWebMVC.Services.Exceptions;
+using System.Diagnostics;
 
 namespace SalesWebMVC.Controllers
 {
@@ -43,12 +44,12 @@ namespace SalesWebMVC.Controllers
         }
         public IActionResult Delete(int? id) // o sinal de interrogacao é opcional, para indicar que passar o parametro Id é opcional
         {
-            if (id == null) { return NotFound(); }
+            if (id == null) { return RedirectToAction(nameof(Error), new { message = "Id not provided" }); } 
 
             var obj = _sellerService.FindById(id.Value);
-            if(obj == null)
+            if (obj == null)
             {
-                return NotFound();
+                return return RedirectToAction(nameof(Error), new { message = "Id not found" });
             }
             return View(obj);
 
@@ -62,23 +63,24 @@ namespace SalesWebMVC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Details(int? id) {
-            if (id == null) { return NotFound(); }
+        public IActionResult Details(int? id)
+        {
+            if (id == null) {  return RedirectToAction(nameof(Error), new { message = "Id not provided" }); ; }
 
             var obj = _sellerService.FindById(id.Value);
             if (obj == null)
             {
-                return NotFound();
+                 return RedirectToAction(nameof(Error), new { message = "Id not found" }); ;
             }
             return View(obj);
         }
 
         public IActionResult Edit(int? id)
         {
-            if(id == null) { return NotFound(); }
+            if (id == null) { return RedirectToAction(nameof(Error), new { message = "Id not provided" }); ; }
 
             var obj = _sellerService.FindById(id.Value);
-            if(obj == null) { return NotFound(); }
+            if (obj == null) { return RedirectToAction(nameof(Error), new { message = "Id not found" }); }
 
             List<Department> departments = _departmentService.FindAll();
             SellerViewModel viewModel = new SellerViewModel { Seller = obj, Departments = departments };
@@ -89,26 +91,41 @@ namespace SalesWebMVC.Controllers
         [ValidateAntiForgeryToken] //Para previnir ataque(quando alguem utiliza seu acesso e envia dados maliciosos) aproveitando sua autenticacao
         public IActionResult Edit(int id, Seller seller)
         {
-            if(id != seller.Id)
+            if (id != seller.Id)
             {
-                return BadRequest();
+                 return RedirectToAction(nameof(Error), new { message = "Id mismatch(não corresponde)" });
             }
             try
             {
                 _sellerService.Update(seller);
                 return RedirectToAction(nameof(Index));
             }
-            catch (NotFoundException)
+            catch (NotFoundException e)
             {
 
-                return NotFound();
+                 return RedirectToAction(nameof(Error), new { message = e.Message });
             }
-            catch (DbConcurrencyException)
+            catch (DbConcurrencyException e)
             {
 
-                return BadRequest();
+                return RedirectToAction(nameof(Error), new { message = e.Message });
+
             }
 
         }
+        public IActionResult Error(string message)
+        {
+            var viewModel = new ErrorViewModel
+            {
+                Message = message,
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+                //Current é opcional por isso usamos o sinal de ?                                                                       
+                //operador de coalescência nula ( ?? ) é um operador lógico que retorna o seu operando do lado direito quando o seu operador do lado esquerdo é null ou undefined
+                //essa declação está pegando Id interno da requisição
+            };
+            return View(viewModel);
+        }
+
+
     }
 }
