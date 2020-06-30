@@ -34,5 +34,25 @@ namespace SalesWebMVC.Services
                 .OrderByDescending(x => x.Date)
                 .ToListAsync();//ToLis faz a consulta
         }
+
+        public async Task<List<IGrouping<Department,SalesRecord>>> FindByDateGroupingAsync(DateTime? minDate, DateTime? maxDate)
+        {
+            var result = from obj in _context.SalesRecords select obj;
+            //Lembrando!!!essa consulta não é executada pela simples declaracao dela.
+            if (minDate.HasValue)
+            {
+                result = result.Where(x => x.Date >= minDate.Value);
+            }
+            if (maxDate.HasValue)
+            {
+                result = result.Where(x => x.Date <= maxDate.Value);
+            }
+            return await result
+                .Include(x => x.Seller)//O Incluide está fazendo um JOIN com a tabale de Vendedor e Departamento
+                .Include(x => x.Seller.Department)
+                .OrderByDescending(x => x.Date)
+                .GroupBy(x=>x.Seller.Department)
+                .ToListAsync();//ToLis faz a consulta
+        }
     }
 }
