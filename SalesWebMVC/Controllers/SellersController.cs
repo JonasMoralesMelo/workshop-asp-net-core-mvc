@@ -50,7 +50,7 @@ namespace SalesWebMVC.Controllers
         }
         public async Task<IActionResult> Delete(int? id) // o sinal de interrogacao é opcional, para indicar que passar o parametro Id é opcional
         {
-            if (id == null) { return RedirectToAction(nameof(Error), new { message = "Id not provided" }); } 
+            if (id == null) { return RedirectToAction(nameof(Error), new { message = "Id not provided" }); }
 
             var obj = await _sellerService.FindByIdAsync(id.Value);
             if (obj == null)
@@ -62,21 +62,29 @@ namespace SalesWebMVC.Controllers
         }
         [HttpPost]// Informa que é uma ação de POST e não de GET
         [ValidateAntiForgeryToken] //Para previnir ataque(quando alguem utiliza seu acesso e envia dados maliciosos) aproveitando sua autenticacao
-        public async Task<IActionResult>  Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-           await _sellerService.RemoveAsync(id);
+            try
+            {
+                await _sellerService.RemoveAsync(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (IntegrityException e)
+            {
 
-            return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Error), new { message = e.Message });
+            }
+
         }
 
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null) {  return RedirectToAction(nameof(Error), new { message = "Id not provided" }); ; }
+            if (id == null) { return RedirectToAction(nameof(Error), new { message = "Id not provided" }); ; }
 
-            var obj =  await _sellerService.FindByIdAsync(id.Value);
+            var obj = await _sellerService.FindByIdAsync(id.Value);
             if (obj == null)
             {
-                 return RedirectToAction(nameof(Error), new { message = "Id not found" }); ;
+                return RedirectToAction(nameof(Error), new { message = "Id not found" }); ;
             }
             return View(obj);
         }
@@ -85,7 +93,7 @@ namespace SalesWebMVC.Controllers
         {
             if (id == null) { return RedirectToAction(nameof(Error), new { message = "Id not provided" }); ; }
 
-            var obj =  await _sellerService.FindByIdAsync(id.Value);
+            var obj = await _sellerService.FindByIdAsync(id.Value);
             if (obj == null) { return RedirectToAction(nameof(Error), new { message = "Id not found" }); }
 
             List<Department> departments = await _departmentService.FindAllAsync();
@@ -105,7 +113,7 @@ namespace SalesWebMVC.Controllers
             }
             if (id != seller.Id)
             {
-                 return RedirectToAction(nameof(Error), new { message = "Id mismatch(não corresponde)" });
+                return RedirectToAction(nameof(Error), new { message = "Id mismatch(não corresponde)" });
             }
             try
             {
@@ -115,7 +123,7 @@ namespace SalesWebMVC.Controllers
             catch (NotFoundException e)
             {
 
-                 return RedirectToAction(nameof(Error), new { message = e.Message });
+                return RedirectToAction(nameof(Error), new { message = e.Message });
             }
             catch (DbConcurrencyException e)
             {
