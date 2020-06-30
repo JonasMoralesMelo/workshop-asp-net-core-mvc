@@ -9,15 +9,22 @@ namespace SalesWebMVC.Models
     public class Seller
     {
         public int Id { get; set; }
-        public string  Name { get; set; }
+        [Required]
+        [StringLength(60, MinimumLength = 3, ErrorMessage = "Tamanho deve ter no minimo 3 caracteres")]
+        public string Name { get; set; }
         [DataType(DataType.EmailAddress)]
+        [Required]
+        [EmailAddress(ErrorMessage = "Enter a valid email")]
         public string Email { get; set; }
         [Display(Name = "Birth Date")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
+        [Required]
         public DateTime BirthDate { get; set; }
         [Display(Name = "Base Salary")]
-        [DisplayFormat(DataFormatString ="{0:F2}")] //Para imformar que a formatação é de duas casas
+        [DisplayFormat(DataFormatString = "{0:F2}")] //Para imformar que a formatação é de duas casas
+        [Required]
+        [Range(100.0, 50000.0, ErrorMessage ="{0} must be from {1} to {2}")]
         public double BaseSalary { get; set; }
         public Department Department { get; set; }
         public ICollection<SalesRecord> Sales { get; set; } = new List<SalesRecord>();

@@ -39,6 +39,12 @@ namespace SalesWebMVC.Controllers
         [ValidateAntiForgeryToken] //Para previnir ataque(quando alguem utiliza seu acesso e envia dados maliciosos) aproveitando sua autenticacao
         public IActionResult Create(Seller seller)
         {
+            if (!ModelState.IsValid)// essa é uma validação back-end para que o usuario preencha as informações corretas do formulário
+            {
+                var departments = _departmentService.FindAll();
+                var viewModel = new SellerViewModel { Seller = seller, Departments = departments };
+                return View(viewModel);
+            }
             _sellerService.Insert(seller);
             return RedirectToAction(nameof(Index));
         }
@@ -91,6 +97,12 @@ namespace SalesWebMVC.Controllers
         [ValidateAntiForgeryToken] //Para previnir ataque(quando alguem utiliza seu acesso e envia dados maliciosos) aproveitando sua autenticacao
         public IActionResult Edit(int id, Seller seller)
         {
+            if (!ModelState.IsValid)// essa é uma validação back-end para que o usuario preencha as informações corretas do formulário
+            {
+                var departments = _departmentService.FindAll();
+                var viewModel = new SellerViewModel { Seller = seller, Departments = departments };
+                return View(viewModel);
+            }
             if (id != seller.Id)
             {
                  return RedirectToAction(nameof(Error), new { message = "Id mismatch(não corresponde)" });
